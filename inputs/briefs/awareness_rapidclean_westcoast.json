@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "campaign": {
+    "name": "RapidClean Eco Awareness - West Coast",
+    "objective": "eco_friendly_awareness",
+    "kpi": {
+      "primary": "Increase awareness of eco-friendly cleaning products on the US West Coast",
+      "secondary_conversion": "Clicks on the legal/terms page from the ad landing page"
+    },
+    "targetRegion": "US-West",
+    "targetAudience": {
+      "personaId": "young-urban-professionals",
+      "label": "Young Urban Professionals",
+      "description": "Eco-conscious professionals in West Coast cities who want stylish, environmentally friendly products that fit their modern lifestyles.",
+      "channels": [
+        "instagram_feed",
+        "instagram_stories",
+        "facebook_feed"
+      ]
+    },
+    "campaignMessage": "Eco-friendly cleaning that clears your space and your mind."
+  },
+  "brand": {
+    "name": "RapidClean",
+    "logoPath": "inputs/brand/rapidclean_logo.png",
+    "primaryColor": "#3366cc",
+    "secondaryColor": "#86b95a",
+    "voice": "Confident, friendly, practical. Always connect a clean home with mental clarity and reduced stress.",
+    "tagline": "Clean Home = Positive Mental Health",
+    "useMascotByDefault": false
+  },
+  "products": [
+    {
+      "id": "purepath-floor-wash",
+      "name": "PurePath Floor Wash",
+      "type": "eco_floor_cleaner",
+      "description": "A gentle, plant-based floor cleaner that leaves surfaces spotless and safe for kids and pets.",
+      "benefits": [
+        "Plant-based formula",
+        "Low-odor, fresh scent",
+        "Safe for kids and pets",
+        "Streak-free shine"
+      ],
+      "aromatherapyProfile": [
+        "Calming eucalyptus",
+        "Crisp citrus"
+      ],
+      "assetFolder": "inputs/assets/purepath_floor_wash",
+      "preferredScenes": [
+        "Bright, daylight living room with shiny hardwood floors",
+        "Modern apartment with large windows and plants"
+      ]
+    },
+    {
+      "id": "naturaglow-wood-polish",
+      "name": "NaturaGlow Wood Polish",
+      "type": "gentle_wood_polish",
+      "description": "An eco-conscious wood polish that enhances the natural beauty of wood surfaces without harsh chemicals.",
+      "benefits": [
+        "Enhances natural wood grain",
+        "No harsh chemicals",
+        "Safe for homes with pets and kids",
+        "Low-sheen, premium finish"
+      ],
+      "aromatherapyProfile": [
+        "Warm sandalwood",
+        "Soft vanilla"
+      ],
+      "assetFolder": "inputs/assets/naturaglow_wood_polish",
+      "preferredScenes": [
+        "Cozy living room with wooden coffee table",
+        "Minimalist home office with wood desk and soft daylight"
+      ]
+    }
+  ],
+  "creativeGuidelines": {
+    "aspectRatios": [
+      "1:1",
+      "9:16",
+      "16:9"
+    ],
+    "messageLanguage": "en-US",
+    "copyTone": "Encouraging, non-judgmental, lightly humorous.",
+    "headlineMaxChars": 40,
+    "bodyMaxChars": 120,
+    "layoutHints": {
+      "logoPlacement": "top-left or bottom-left with clear space",
+      "safeTextZones": "Avoid extreme edges; keep headline in upper third, body in lower third",
+      "useMascotWhen": "Optional; for more playful variants or stories rather than core awareness posts."
+    }
+  },
+  "compliance": {
+    "requiredPhrases": [
+      "RapidClean™"
+    ],
+    "bannedPhrases": [
+      "miracle",
+      "guaranteed",
+      "dull",
+      "boring",
+      "shiny"
+    ],
+    "disclaimer": "Results may vary by home condition and how often you clean.",
+    "legalLandingUrl": "https://rapidclean.ninja/legal"
+  }
+}

@@ -1,0 +1,1 @@
+python -m scaled_content_agent.utils.cli
