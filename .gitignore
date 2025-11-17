@@ -15,4 +15,5 @@ __pycache__/
 .vscode/
 
 # mac
-.DS_STORE
+.DS_Store
+
