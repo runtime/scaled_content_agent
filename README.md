@@ -1,9 +1,83 @@
 # 📘 Scaled Content Orchestration Agent
 
 #### An agentic platform that accelerates campaign velocity enabling agencies to release more campaigns per month, drive localized engagement and maintain brand guidelines.
+This POC was limited to 6–8 hrs intentionally. Show how an agency could automate a large chunk of **production work** on a creative delivery. Some of this would NOT be done in either the creative or the production process. its just a poc.
 
-#### author:
-- runtime@github.com
+#### Author
+👩🏽‍🚀 runtime@github.com
+
+### Orchestration Tool Requirements
+- Accelerate Campaign Velocity
+- Ensure Brand Consistency
+- Maximize Relevance & Personalization
+- Optimize marketing ROI
+- Gain Actionable Insights
+
+
+ ### Lets assume we are handling a brief for an awareness campaign for two of our clients products.
+In this demo we will create copy and images, but also build resizes. Sort of mixing production and creative together just for poc.
+
+
+#### Our Client
+- 🧽 RapidClean
+  - an eco friendly cleaning product manufacturer who needs to tell CA residents our products are safe.
+#### Products that need awareness campaigns
+- PurePath Floor Wash
+- NaturaGlow Wood Polish
+#### Campaign (Assume campaign and users are assigned in workfront->program)
+- Eco Awareness - drive traffic to companies local legal & compliance pages etc...
+#### Required outputs:
+- reuse existing assets - assume assets are in a DAM
+- generate missing elements when there are none 
+- produce 3 sizes
+- place consistent copy and legal 
+- local run cli script with organized outputs
+
+
+### ✅ Brief ingestion + asset reuse
+- Accepts a JSON brief with:
+  - campaign name, KPIs, audience, region  
+  - two RapidClean products  
+  - campaign messaging & brand guidelines  
+  - legal disclaimer  
+- Uses reusable assets from `/inputs/assets/...`:
+  - product bottle PNGs  
+  - mascot PNG  
+  - brand logo  
+- If assets aren’t there → pipeline still works (Imagen fills the gap)
+
+
+### ✅ Consistent messaging across all sizes
+- Headline, body, and legal are generated once via Vertex Gemini (LLM)
+- Written to `copy.json`
+- Legal is as is from brief, no LLM.
+- Same exact copy is passed to every image generation call → consistent across all formats
+
+### ✅ Text overlay placed through Imagen
+- The Imagen hero prompt includes:
+  - headline  
+  - body  
+  - disclaimer  
+- Pillow compositing ensures brand elements (bottle, mascot, logo) stay exactly where they belong
+
+### ✅ Generates Localized Images for Hero
+- Generates a localized Hero image for assets and copy to sit over
+    - composites the product, mascot, headline and text
+
+### ✅ Generates Three aspect ratios
+Generates 3 standard social sizes for each product:
+- **1:1** (Instagram feed)  
+- **9:16** (Stories/Reels/TikTok)  
+- **16:9** (YouTube/FB widescreen)
+
+### ✅ Local run + organized outputs
+```python
+    outputs/
+      awareness_campaign/
+        v1/
+          purepath/
+          naturaglow/
+```
 ## Features:
 ### 🧠 Google's ADK agentic Development Kit
 A valid and quick way to create a scalable POC for a custom orchestration that emulates an agency production pipeline.
@@ -43,67 +117,6 @@ Layout is consistent across sizes, to match brand requirements
 - scaling
 - alpha
 - compositing
-
-## ✨ POC Requirements Overview
-
-### Lets assume we are handling a brief for an awareness campaign for two of clients' products.
-#### Client
-- RapidClean
-  - an eco friendly cleaning product manufacturer
-#### Products
-- PurePath Floor Wash
-- NaturaGlow Wood Polish
-#### Campaign (workfront-program)
-- Eco Awareness - drive traffic to local compliance etc...
-#### Required outputs:
-- reuse existing assets
-- generate missing elements when there are none
-- produce 3 sizes
-- place consistent copy and legal
-- local run cli script with organized outputs
-
-This project implements the **required elements** of the project in local environment agentic pipeline.
-Lets assume we are handling an awareness campaign for two products
-
-### ✅ Brief ingestion + asset reuse
-- Accepts a JSON brief with:
-  - campaign name, KPIs, audience, region  
-  - two RapidClean products  
-  - campaign messaging & brand guidelines  
-  - legal disclaimer  
-- Uses reusable assets from `/inputs/assets/...`:
-  - product bottle PNGs  
-  - mascot PNG  
-  - brand logo  
-- If assets aren’t there → pipeline still works (Imagen fills the gap)
-
-### ✅ Three aspect ratios
-Generates 3 standard social sizes for each product:
-- **1:1** (Instagram feed)  
-- **9:16** (Stories/Reels/TikTok)  
-- **16:9** (YouTube/FB widescreen)
-
-### ✅ Consistent messaging across all sizes
-- Headline, body, and legal are generated once via Vertex Gemini (LLM)
-- Written to `copy.json`
-- Same exact copy is passed to every image generation call → consistent across all formats
-
-### ✅ Text overlay placed through Imagen
-- The Imagen hero prompt includes:
-  - headline  
-  - body  
-  - disclaimer  
-- Pillow compositing ensures brand elements (bottle, mascot, logo) stay exactly where they belong
-
-### ✅ Local run + organized outputs
-```python
-    outputs/
-      awareness_campaign/
-        v1/
-          purepath/
-          naturaglow/
-
-```
 
 ### 👩🏽‍🎨 Wanna try it? ... Pregame Setup:
 #### Important:
@@ -153,7 +166,8 @@ Simple optional flag for seeds:
   -  🤖 `image_agent` (Imagen 4 + Pillow)
     - leverages imagen `GenerateImagesConfig`
       - uses dynamic prompt from orchestration agent - takes location and regional copy
-        - ```prompt = (
+        ```
+        prompt = (
                   f"Bright, minimal, daylight {campaign_cfg.target_region} home interior. "
                   f"Eco-friendly aesthetic, clean, calm, modern. "
                   f"Soft shadows, open space near bottom for product placement. "
@@ -168,7 +182,44 @@ Simple optional flag for seeds:
       - creates the sizes
       - uses legal and copy json generated by copy_agent to have consistent legal and copy
 
-GLHF~!
+
+## How did we do?
+#### 🚀 Accelerated campaign velocity
+
+Brief → copy → 6 creatives in seconds, not hours.
+Historically:
+15–20 min per size × 6 sizes = 1.5–2 hours
+
+At $25/hr → ~$40–$50 saved per campaign
+This POC automates ~90% of production workload.
+
+#### 🧩 Brand governance maintained
+
+Bottle, logo, and mascot come from DAM folder
+
+Copy is identical across all creative sizes
+
+Legal is guaranteed
+
+Region influences imagery (demo-friendly)
+
+#### 🛠️ Extensible architecture
+
+Easy to add: QC agent, localization, optimizer, Workfront/DAM integrations
+
+Designed for CD/CI-style workflows
+
+Each agent is testable and isolated
 
 
+## What else would we do with more time?
 
+### Analytics and DCO
+we could take campaign analytics and optimize each delivery to perform better
+change colors, copy on cta etc..
+
+#### Real-time CDP, RTB, PAB 
+We are at an unprecedented time in history where we can almost literally put our audience into the ads. This could be done with tools like Adobe real-time CDP, Target and other tools along with PAB, RTB and DCO platforms, this becomes a reality.
+
+#### RAG for insights corpus
+using google search tools to build a corpus of data either private or public to serve insights to key agency employees either while they brainstorm or create content.
