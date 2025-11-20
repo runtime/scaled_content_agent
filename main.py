@@ -10,6 +10,8 @@ from .subagents.image_agent import ImageGenerationAgent
 class Orchestrator:
     """
     v1 Orchestrator
+    Main is a Single Process, Single Run, batch CLI
+    no concurrency, or long-lived state for simplicity
     ----------------
     Responsibilities:
       1. Load the brief
@@ -19,7 +21,6 @@ class Orchestrator:
       5. Generate hero images + composite local assets
       6. Print a summary
 
-    No fancy logic, no complex state — just a clean pipeline.
     """
 
     def __init__(self, project_root=None):
@@ -29,7 +30,7 @@ class Orchestrator:
         else:
             self.project_root = Path(project_root)
 
-        # Instantiate core agents
+        # Instantiate tool and llm subagents
         self.brief_agent = BriefIngestionAgent(project_root=self.project_root)
         self.copy_agent = CopywritingAgent()
         self.image_agent = ImageGenerationAgent()
@@ -37,6 +38,7 @@ class Orchestrator:
     def run_ingestion_and_prepare_outputs(self, brief_path, output_root, seed=None):
         """
         Main entrypoint called by the CLI.
+        kicks off the chain
         """
 
         brief_path = Path(brief_path)
@@ -49,7 +51,7 @@ class Orchestrator:
         if not output_root.is_absolute():
             output_root = self.project_root / output_root
 
-        # 1. Ingest brief → CampaignConfig + ProductConfigs
+        # 1. BRIEF AGENT: Ingest brief → CampaignConfig + ProductConfigs
         campaign_cfg = self.brief_agent.ingest(brief_path)
 
         # 2. Create per-product output folders
@@ -57,20 +59,20 @@ class Orchestrator:
             product_dir = output_root / product.slug
             product_dir.mkdir(parents=True, exist_ok=True)
 
-        # 3. Generate copy.json per product
+        # 3. COPY AGENT: Generate copy.json per product
         self.copy_agent.generate_copy_for_products(
             campaign_cfg=campaign_cfg,
             output_root=output_root,
         )
 
-        # 4. Generate hero images + composite assets
+        # 4. IMAGE AGENT: Generate hero images + composite assets
         self.image_agent.generate_images_for_products(
             campaign_cfg=campaign_cfg,
             output_root=output_root,
             seed=seed,
         )
 
-        # 5. Summary
+        # 5. ROOT AGENT (self) Summary using print statements for convenience
         self._print_summary(campaign_cfg, output_root)
 
         return campaign_cfg

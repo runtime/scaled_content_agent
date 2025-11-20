@@ -21,7 +21,8 @@ class ImageGenerationAgent:
       - Composites layers onto the background using Pillow
       - Saves 3 aspect ratios per product
     """
-
+    # again pass env vars during construction
+    # default is vertexai true which is needed
     def __init__(self):
         location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
         project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "adk-llm-agent")
@@ -38,8 +39,9 @@ class ImageGenerationAgent:
             "16x9": (1600, 900),
         }
 
-    # generate images when there are none, load if they exist
-    # also take the output folder and seed as params
+    # this function ALWAYS generates outputs.
+    # it loads assets if they exist for consistency.
+    # it doesn't cache hero pngs (blessing or curse, up to your needs)
     # generate the hero
     def generate_images_for_products(self, campaign_cfg, output_root, seed=None):
         output_root = Path(output_root)
@@ -72,7 +74,7 @@ class ImageGenerationAgent:
             # Generate all ratios
             for ratio_label, (w, h) in self.aspect_ratios.items():
                 print(f"\n▶ Generating background for {product.name} / {ratio_label}")
-                # create the localized hero with copy image (shortcut)
+                # create hero image
                 background = self._generate_background_image(
                     product=product,
                     campaign_cfg=campaign_cfg,
@@ -82,18 +84,20 @@ class ImageGenerationAgent:
                     seed=seed,
                 )
 
-                # Now composite layers
+                # Now composite all the things generated or loaded
                 final_img = self._composite_layers(
                     background=background,
                     product_img=product_img,
                     mascot_img=mascot_img,
                     logo_img=logo_img,
                 )
-
+                # append the file names to have the campaign names in them (some DSPs require specific names)
                 output_path = product_dir / f"{ratio_label}_awareness.png"
                 final_img.save(output_path)
                 print(f"✅ Saved {output_path}")
 
+    # returns None if there is no png, thus omitting it by design
+    # converts all to rgba so that transparency is considered.
     def _load_png(self, path, label):
         """
         Loads a PNG if it exists; otherwise returns None.
@@ -158,7 +162,7 @@ class ImageGenerationAgent:
 
         try:
             result = self.client.models.generate_images(
-                model="imagen-4.0-generate-001",
+                model="imagen-4.0-generate-001", # <-- hard coded model not ideal for fallbacks or degradation
                 prompt=prompt,
                 config=config,
             )
@@ -166,6 +170,9 @@ class ImageGenerationAgent:
             if not result.generated_images:
                 raise RuntimeError("Imagen returned no images")
 
+            # need to write a temp file as png (for this demo its easier than caching base64 etc.)
+            # vertexai returns a custom image wrapper not a raw PIL image.
+            # fastest way is to save a png to a temp file, open it in pillow and delete the image
             from tempfile import NamedTemporaryFile
             import os
 
@@ -189,6 +196,7 @@ class ImageGenerationAgent:
 
     # todo create layouts for different campaigns / regions
     # for now this is a simple layout tool using Pillow keeping brand guidelines consistent
+    # this is very much how banner templates are created using any tools necessary, canvas, html etc..
     def _composite_layers(self, background, product_img, mascot_img, logo_img):
         """
         Composite: logo → product (bottom-right) → mascot (bottom-left, optional)

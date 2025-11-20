@@ -94,9 +94,11 @@ class BriefIngestionAgent:
 
         target_audience = campaign["targetAudience"]
         brand_logo_path = self.project_root / brand["logoPath"]
-        #legal_disclaimer = campaign["legalDisclaimer"] # <--  try datatype set to use get method
+        #legal_disclaimer = campaign["legalDisclaimer"]
         legal_disclaimer = campaign.get("legalDisclaimer", "")
 
+        # set object using keys
+        # todo implement pyndantic for schema layer for missing key errors
         config = CampaignConfig(
             name=campaign["name"],
             objective=campaign.get("objective", ""),

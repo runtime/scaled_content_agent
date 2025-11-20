@@ -3,11 +3,12 @@
 import os
 import json
 from pathlib import Path
-
+# this is an agent and it uses genai. env needs to be set accordingly
 from google import genai
 
 
 class CopywritingAgent:
+    # docstring is for AI to clarify purpose, output format and what the downstream agents depend on
     """
     v1 GenAI Copy Agent
     -------------------
@@ -30,17 +31,24 @@ class CopywritingAgent:
     """
 
     def __init__(self):
+        # agent needs to own execution context so env vars need to be passed during CONSTRUCTION
+        # agent can be configured once and reused against many calls.
         location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
         project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "adk-llm-agent")
 
         # create agent via genai.Client, pass in project id and location
+        # agent needs your project id (with billing account) and location (default is global so use regional)
         self.client = genai.Client(
             vertexai=True,
             project=project_id,
             location=location,
         )
 
-    # use config to generate copy
+    # public function called by ingestion agent
+    # use the config to pass to genai as dynamic prompt
+    # call the LLM for the copy
+    # parse it
+    # write it to the json file
     def generate_copy_for_products(self, campaign_cfg, output_root):
         output_root = Path(output_root)
 
@@ -48,6 +56,7 @@ class CopywritingAgent:
             product_dir = output_root / product.slug
             product_dir.mkdir(parents=True, exist_ok=True)
 
+            # receive a tuple of headline body and legal
             headline, body, disclaimer = self._gen_copy_for_product(
                 campaign_cfg, product
             )
@@ -64,6 +73,8 @@ class CopywritingAgent:
                 "disclaimer": disclaimer,
             }
             # save the copy to the local store
+            # indent 2 = human readable
+            # ascii = false ensures accents and emojis (localization things)
             copy_path = product_dir / "copy.json"
             try:
                 with copy_path.open("w", encoding="utf-8") as f:
@@ -72,6 +83,7 @@ class CopywritingAgent:
             except OSError as e:
                 print(f"⚠️  Failed to write copy file for {product.name}: {e}")
 
+    # private method called by self returns a tuple
     def _gen_copy_for_product(self, campaign_cfg, product):
         """
         Ask Gemini for structured ad copy.
@@ -130,23 +142,24 @@ class CopywritingAgent:
                 contents=prompt,
             )
 
+            # strip the response of docstrings and stuff
             text = response.text.strip()
 
-            # Strip ```json code fences if present
+            # Strip ```json code fences if present from the LLM
             if text.startswith("```"):
                 text = text.strip("`")
                 # remove possible leading 'json' or 'JSON'
                 if text.lower().startswith("json"):
                     text = text[4:].strip()
 
-            # the DATA which is out text in json format
+            # then feed the data json.loads
             data = json.loads(text)
-            # use get te to set the headline, fallback (never blank) if none exists
+            # use get for the headline, fallback (never blank) if none exists repeat for all three.
             headline = data.get("headline", fallback_headline)
             body = data.get("body", fallback_body)
             disclaimer = data.get("disclaimer", fallback_disclaimer)
 
-            # helper stuff used to clean up return format
+            # helper tuple of headline, body and legal, if the genai failed, fall back to json obj data
             return headline.strip(), body.strip(), disclaimer.strip()
 
         except Exception as e:

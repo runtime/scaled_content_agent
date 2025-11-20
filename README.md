@@ -121,13 +121,20 @@ Layout is consistent across sizes, to match brand requirements
 ### 👩🏽‍🎨 Wanna try it? ... Pregame Setup:
 #### Important:
 you will need to fork over a credit card to run this application.
+
 - create a google cloud account
 - create a project and enable the vertexai api and genai apis
 - create some keys
-- create an .env file in the orchestration-agent-poc/scaled_content_agent
-- put the keys in there and you are in the right direction
-- finally gcloud auth in terminal to log you in 
-  - all not covered here for speed
+
+#### Note:
+the agent needs to own execution context so env vars need to be passed during construction of the agent.
+- create an .env file in the orchestration-agent-poc/scaled_content_agent folder not at the root directory.
+  - I grab your env in the __init__ of each agents class using os
+- use the gcloud project name not the ID as this confuses some folks
+- finally you need to gcloud auth in terminal to log you in 
+all not covered here for speed
+
+#### Steps to run:
 
 ```python
 cd orchestration-agent-poc
